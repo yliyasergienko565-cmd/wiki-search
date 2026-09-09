@@ -1,0 +1,2 @@
+# Внешних зависимостей нет — только стандартная библиотека Python 3.8+
+# (urllib, concurrent.futures, re, json, hashlib).
