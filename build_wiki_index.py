@@ -4,10 +4,23 @@
 ссылка, раздел, дата, 2-3 предложения «о чём» + список вопросов из подзаголовков).
 
     python build_wiki_index.py            # собрать/пересобрать wiki-index.md
+    python build_wiki_index.py build      # то же явно
+    python build_wiki_index.py check      # не пора ли пересобрать? (для /wiki-search)
     python build_wiki_index.py --out X.md  # другой путь для вывода
 
-Только стандартная библиотека. Полный обход ~99 документов ≈ 5-10 сек."""
-import os, re, sys, argparse
+Только стандартная библиотека. Полный обход ~99 документов ≈ 5-10 сек.
+
+Когда индекс считается устаревшим (`check`):
+  1. файла нет или не читается шапка          -> REBUILD
+  2. индексу больше MAX_AGE_DAYS (14) дней     -> REBUILD
+     (страховка от тихих правок содержимого — дат правок в самом индексе нет)
+  3. дешёвая сверка списка: обходим 7 страниц разделов (~1-2 с, документы не
+     качаем) и сравниваем набор URL с индексом. Добавили/удалили документ -> REBUILD
+  4. сверка не удалась из-за сети              -> WARN, ищем по текущему индексу
+  5. иначе                                     -> OK
+
+Коды выхода: 0 — можно искать (OK/WARN), 3 — нужна пересборка (REBUILD)."""
+import os, re, sys, argparse, datetime
 
 for _s in (sys.stdout, sys.stderr):
     try:
@@ -21,6 +34,7 @@ from wiki_common import (
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT_DEFAULT = os.path.join(HERE, "wiki-index.md")
+MAX_AGE_DAYS = 14
 
 _NUM_PREFIX = re.compile(r"^\s*(?:\d+[.)]\s*|[-–—•]\s*)")
 
@@ -121,8 +135,52 @@ def build(out_path):
         print(f"ВНИМАНИЕ: {len(errors)} документ(ов) не загрузились — см. выше.")
 
 
+def check(out_path):
+    """Решить, пора ли пересобирать индекс. -> код выхода (0 искать / 3 пересобрать)."""
+    if not os.path.exists(out_path):
+        print("REBUILD: индекса нет —", out_path)
+        return 3
+    head = open(out_path, encoding="utf-8").read(2000)
+    md = re.search(r"Собрано:\s*(\d{4}-\d{2}-\d{2})\s*·\s*документов:\s*(\d+)", head)
+    if not md:
+        print("REBUILD: не читается шапка индекса")
+        return 3
+    built = datetime.date.fromisoformat(md.group(1))
+    n_index = int(md.group(2))
+    age = (datetime.date.today() - built).days
+    if age > MAX_AGE_DAYS:
+        print(f"REBUILD: индексу {age} дн. (> {MAX_AGE_DAYS}) — собран {built}")
+        return 3
+
+    # дешёвая сверка списка документов (без загрузки самих страниц)
+    try:
+        live_paths, sections = crawl_doc_paths()
+    except Exception as e:
+        print(f"WARN: сверка списка не удалась ({e!r}); индексу {age} дн. — "
+              f"ищу по текущему индексу")
+        return 0
+    live = {BASE + p for p in live_paths}
+    have = set(re.findall(r"^- URL:\s*(\S+)", open(out_path, encoding="utf-8").read(), re.M))
+    added, removed = live - have, have - live
+    if added or removed:
+        print(f"REBUILD: список изменился (+{len(added)} / -{len(removed)}), "
+              f"разделов {len(sections)}")
+        for u in sorted(added):
+            print("   + " + u)
+        for u in sorted(removed):
+            print("   - " + u)
+        return 3
+    print(f"OK: индексу {age} дн. (собран {built}), документов {n_index}, "
+          f"список совпадает ({len(live)})")
+    return 0
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default=OUT_DEFAULT, help="куда писать индекс")
+    ap.add_argument("mode", nargs="?", default="build", choices=["build", "check"],
+                    help="build (по умолчанию) — собрать индекс; check — не пора ли пересобрать")
+    ap.add_argument("--out", default=OUT_DEFAULT, help="путь к индексу")
     a = ap.parse_args()
+    if a.mode == "check":
+        raise SystemExit(check(a.out))
     build(a.out)

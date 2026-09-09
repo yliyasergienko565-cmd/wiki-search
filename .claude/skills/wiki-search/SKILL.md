@@ -1,6 +1,6 @@
 ---
 name: wiki-search
-description: Use when someone asks a question about how the company works and the answer should come from the corporate wiki (DataPeople wiki at https://agentsim.online/wiki/) — processes, product, sales, HR, finance, tech docs. Reads the local map wiki-index.md, picks the 2-3 most relevant documents by their descriptions, opens only those pages, and answers strictly from them, ALWAYS citing the source document with its full URL. Triggers: «спроси в вики», «что написано в вики про…», «где в вики…», «как у нас принято…», «какой у нас процесс…», «дай ссылку на документ про…».
+description: Use when someone asks a question about how the company works and the answer should come from the corporate wiki (DataPeople wiki at https://agentsim.online/wiki/) — processes, product, sales, HR, finance, tech docs. First self-checks whether the local map wiki-index.md is stale and rebuilds it if so, then picks the 2-3 most relevant documents by their descriptions, opens only those pages, and answers strictly from them, ALWAYS citing the source document with its full URL. Triggers: «спроси в вики», «что написано в вики про…», «где в вики…», «как у нас принято…», «какой у нас процесс…», «дай ссылку на документ про…».
 ---
 
 # wiki-search
@@ -19,14 +19,29 @@ C:/Users/yliya/OneDrive/Документы/ailearning/wiki-search
 
 ## Что делать
 
-1. **Прочитать карту.** Открыть `wiki-index.md` из каталога проекта (обычным
-   чтением файла).
-   - Файла нет → сказать пользователю: сначала запусти `/index-wiki`. Не
-     продолжать.
-   - В шапке дата `Собрано:` старше ~30 дней → предупредить, что карта могла
-     устареть, и предложить `/index-wiki`; можно всё равно попробовать ответить.
+1. **Проверить свежесть карты и при необходимости пересобрать.**
+   ```
+   cd "C:/Users/yliya/OneDrive/Документы/ailearning/wiki-search"
+   python build_wiki_index.py check
+   ```
+   Скрипт сам решает, устарел ли индекс (нет файла; индексу > 14 дней; на сайте
+   добавились/удалились документы — дешёвая сверка списка разделов, страницы не
+   качаются). Дальше по выводу:
+   - строка начинается с `OK` → индекс годен, идти к пункту 2;
+   - строка начинается с `WARN` → сверку списка не дала сеть, но индекс не
+     слишком стар — идти к пункту 2, работать по текущему индексу;
+   - строка начинается с `REBUILD` → **сразу пересобрать индекс** (это движок
+     `/index-wiki`):
+     ```
+     python build_wiki_index.py
+     ```
+     Дождаться `Записано: …\wiki-index.md`, затем идти к пункту 2. Если пересборка
+     упала из-за сети, а `wiki-index.md` всё же есть — предупредить пользователя,
+     что индекс мог устареть, и продолжить по нему. Если файла нет и собрать не
+     удалось — сказать пользователю и остановиться.
 
-2. **Выбрать 2-3 документа.** По полям `О чём` и `Вопросы` найти карточки,
+2. **Прочитать карту и выбрать 2-3 документа.** Открыть `wiki-index.md` обычным
+   чтением файла. По полям `О чём` и `Вопросы` найти карточки,
    наиболее близкие к вопросу пользователя. Брать 2-3 штуки (одну — если
    совпадение очевидно и единственное). Если ни одна карточка даже близко не про
    это — сразу перейти к пункту 5 («в вики нет»).
@@ -62,6 +77,9 @@ C:/Users/yliya/OneDrive/Документы/ailearning/wiki-search
 - Зависимостей нет — только стандартная библиотека Python 3.
 - `fetch_pages.py` принимает только ссылки вида
   `https://agentsim.online/wiki/<раздел>/<слаг>`.
-- Карту `wiki-index.md` строит и обновляет скилл `/index-wiki`
-  (`python build_wiki_index.py`). Здесь её только читаем.
+- Карту `wiki-index.md` строит скилл `/index-wiki` (`python build_wiki_index.py`).
+  `/wiki-search` перед поиском сам делает `build_wiki_index.py check` и, если
+  индекс устарел, запускает пересборку — отдельно звать `/index-wiki` не нужно.
+- Критерий устаревания (в `build_wiki_index.py check`): файла нет · индексу
+  больше 14 дней · изменился список документов на сайте.
 - Разделы вики: finance, general, hr, marketing, product, sales, tech.

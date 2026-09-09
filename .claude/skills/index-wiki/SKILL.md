@@ -1,6 +1,6 @@
 ---
 name: index-wiki
-description: Use to build or refresh the wiki index — the single file wiki-index.md that maps every document in the DataPeople corporate wiki (https://agentsim.online/wiki/) with a short "what it's about" + list of questions it covers. Run this when wiki-index.md is missing, looks stale (old "Собрано" date), or the wiki has changed (docs added/removed/rewritten), or when /wiki-search reports the index is out of date. Triggers: «обнови индекс вики», «пересобери wiki-index», «проиндексируй вики».
+description: Use to build or refresh the wiki index — the single file wiki-index.md that maps every document in the DataPeople corporate wiki (https://agentsim.online/wiki/) with a short "what it's about" + list of questions it covers. Run this for a manual rebuild — wiki-index.md is missing, looks stale, or the wiki has changed (docs added/removed/rewritten). Note: /wiki-search already self-checks the index (build_wiki_index.py check) and rebuilds it automatically before searching, so calling this by hand is only needed when you want to force a fresh index now. Triggers: «обнови индекс вики», «пересобери wiki-index», «проиндексируй вики».
 ---
 
 # index-wiki
