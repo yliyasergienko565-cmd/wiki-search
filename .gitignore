@@ -1,5 +1,6 @@
 __pycache__/
 *.pyc
-# Индекс — генерируемый артефакт, собирается за ~5 сек: python wiki_index.py build
-index/*.jsonl
-index/meta.json
+# Индекс — генерируемый артефакт (python wiki_index.py build, ~5 сек)
+index/
+.claude/skills/wiki-search/index/*.jsonl
+.claude/skills/wiki-search/index/*.json
