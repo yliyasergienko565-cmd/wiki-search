@@ -1,0 +1,14 @@
+# Таблицы менеджеров — источники для /index-sheets и /sheets-search.
+# Одна ссылка на Google-таблицу в строке. Пустые строки и # игнорируются.
+# Добавить/убрать таблицу — правьте этот файл и запускайте /index-sheets.
+
+https://docs.google.com/spreadsheets/d/1CtNttGw_A4bCX1m2pTwCTRkr9125B4b8t6tVlfbUu5s/edit
+https://docs.google.com/spreadsheets/d/1j_DWedIEkI43SGTUqPtROQKBK3MXH6dmtyB_OfF66d8/edit
+https://docs.google.com/spreadsheets/d/1Q35YyGILRxBJOxs7l6SxyjMxwL5xSIg7S6fKDNsMlU8/edit
+https://docs.google.com/spreadsheets/d/1K5wALh6TZ1azMVJXVaZoVPZa_tP-ZoFyWMV8CZx6hLE/edit
+https://docs.google.com/spreadsheets/d/1zqr1fPjRyZrLCEvxXxy8k9djUwGm27lkAtAnkZetuik/edit
+https://docs.google.com/spreadsheets/d/1jnGBZ9JeurYifoT0FvlSATsDeIIF4lrYzERH6DD6Ouo/edit
+https://docs.google.com/spreadsheets/d/1sMidCTT57ZjIIM0jE0QXVPi5aEL-QITJeyXQoTQ6Lsw/edit
+https://docs.google.com/spreadsheets/d/1ryZ8YD2zM7kKb6SbOBT4wWYHcoIolHNJT7Ujtw1Kuv4/edit
+https://docs.google.com/spreadsheets/d/14Z0laRq0z6I5hLQIYOYX8oMyqYZ5RmnWKqfL7DzwFmI/edit
+https://docs.google.com/spreadsheets/d/1R3soASLzsLMKYck6uCWwdlOznDVWqRt_r_7iG1uuDfg/edit
